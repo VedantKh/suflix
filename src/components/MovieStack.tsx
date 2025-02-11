@@ -1,6 +1,5 @@
 import { MovieObject } from "@/types/movie";
 import MoviePreview from "./MoviePreview";
-import MoviePreviewSkeleton from "./MoviePreviewSkeleton";
 
 interface MovieStackProps {
   movies: MovieObject[];
@@ -26,11 +25,9 @@ export default function MovieStack({
         <div className="overflow-x-auto flex gap-4 px-4 pb-4 snap-x snap-mandatory">
           {isLoading ? (
             // Show skeletons while loading
-            Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="snap-start shrink-0">
-                <MoviePreviewSkeleton />
-              </div>
-            ))
+            <div> 
+                <h3>Loading...</h3>
+            </div>
           ) : movies.length > 0 ? (
             // Show movies
             movies.map((movie) => (
