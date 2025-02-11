@@ -4,41 +4,40 @@ import path from "path";
 import { parse } from "csv-parse/sync";
 import { MovieObject } from "@/types/movie";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Get genre from query params
+    const { searchParams } = new URL(request.url);
+    const genre = searchParams.get("genre")?.toLowerCase();
+
     // Read the CSV file
     const filePath = path.join(
       process.cwd(),
       "src/data/raw_data/movies_metadata.csv"
     );
 
-    // Read only first 1000 lines to limit memory usage
     const fileContent = await fs.readFile(filePath, {
       encoding: "utf-8",
       flag: "r",
     });
-    const lines = fileContent.split("\n").slice(0, 1001).join("\n"); // Include header + 1000 records
+    const lines = fileContent.split("\n").slice(0, 1001).join("\n");
 
-    // Parse CSV content
     const records = parse(lines, {
       columns: true,
       skip_empty_lines: true,
-      relax_column_count: true, // Add this to handle inconsistent column counts
-      relax_quotes: true, // Add this to be more forgiving with quotes
-      skip_records_with_error: true, // Add this to skip problematic records
+      relax_column_count: true,
+      relax_quotes: true,
+      skip_records_with_error: true,
     });
 
-    console.log(records.length);
-
-    // Transform and take records 35-40 instead (since we see good data there)
-    const movies: MovieObject[] = records.slice(70, 80).map((record: any) => {
+    // Transform all records first
+    const allMovies: MovieObject[] = records.map((record: any) => {
       const genres = (() => {
         try {
-          // Clean up the string before parsing
           const cleanedGenres = record.genres
-            .replace(/'/g, '"') // Replace single quotes with double quotes
-            .replace(/\s+/g, " ") // Normalize whitespace
-            .trim(); // Remove any leading/trailing whitespace
+            .replace(/'/g, '"')
+            .replace(/\s+/g, " ")
+            .trim();
 
           const genresData = JSON.parse(cleanedGenres || "[]");
 
@@ -48,12 +47,7 @@ export async function GET() {
             name: g.name,
           }));
         } catch (e) {
-          console.warn(
-            `Skipping genres for movie ${record.id} due to invalid data:`,
-            record.genres,
-            e
-          );
-          return []; // Return empty array instead of throwing error
+          return [];
         }
       })();
 
@@ -75,7 +69,21 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ movies });
+    // Filter by genre if specified and sort by rating
+    const filteredMovies = genre
+      ? allMovies.filter(
+          (movie) =>
+            movie.genres.some((g) => g.name.toLowerCase() === genre) &&
+            movie.vote_count > 100 // Only include movies with significant votes
+        )
+      : allMovies;
+
+    // Sort by rating and take top 10
+    const topMovies = filteredMovies
+      .sort((a, b) => b.vote_average - a.vote_average)
+      .slice(0, 10);
+
+    return NextResponse.json({ movies: topMovies });
   } catch (error) {
     console.error("Error processing CSV:", error);
     return NextResponse.json(

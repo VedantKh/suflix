@@ -10,20 +10,29 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchMovies() {
-      try {
-        const response = await fetch("/api/movies");
-        const data = await response.json();
-        setMoviesList(data.movies);
-      } catch (error) {
-        console.error("Failed to fetch movies:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
+    // Initial load of movies (no genre filter)
     fetchMovies();
   }, []);
+
+  const fetchMovies = async (genre?: string) => {
+    setIsLoading(true);
+    try {
+      const url = genre
+        ? `/api/by_ratings?genre=${encodeURIComponent(genre)}`
+        : "/api/by_ratings";
+      const response = await fetch(url);
+      const data = await response.json();
+      setMoviesList(data.movies);
+    } catch (error) {
+      console.error("Failed to fetch movies:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearchResults = (movies: MovieObject[]) => {
+    setMoviesList(movies);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-1000 via-blue-900 to-gray-1000">
@@ -34,7 +43,7 @@ export default function Home() {
             Suflix{" "}
           </h1>
           <div className="w-full flex justify-center">
-            <Search />
+            <Search onSearchResults={handleSearchResults} />
           </div>
           <MovieStack movies={moviesList} isLoading={isLoading} />
         </main>
