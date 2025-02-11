@@ -7,10 +7,10 @@ export default function Search() {
       <input
         type="text"
         placeholder="Search..."
-        className="flex-1 px-4 py-2 rounded-lg border border-solid border-black/[.08] dark:border-white/[.145] bg-transparent focus:outline-none focus:ring-2 focus:ring-foreground/20"
+        className="flex-1 px-4 py-2 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/30"
       />
       <button
-        className="p-2 rounded-lg bg-foreground text-background hover:bg-[#383838] dark:hover:bg-[#ccc] transition-colors"
+        className="p-2 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 text-white hover:bg-white/20 transition-colors"
         aria-label="Search"
       >
         <svg

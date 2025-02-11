@@ -6,9 +6,9 @@ interface MoviePreviewProps {
 
 export default function MoviePreview({ movie }: MoviePreviewProps) {
   return (
-    <div className="group relative w-full max-w-sm rounded-xl overflow-hidden hover:scale-[1.02] transition-transform">
+    <div className="group relative w-full max-w-sm rounded-3xl overflow-hidden hover:scale-[1.02] transition-transform">
       {/* Glass background */}
-      <div className="absolute inset-0 bg-white/15 dark:bg-black/30 backdrop-blur-xl border border-white/30 dark:border-white/10 rounded-xl shadow-lg" />
+      <div className="absolute inset-0 bg-white/10 dark:bg-white/5 backdrop-blur-xl rounded-3xl shadow-lg" />
 
       {/* Hover overlay mask */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 flex items-center justify-center gap-8">

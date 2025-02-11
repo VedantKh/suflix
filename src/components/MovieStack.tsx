@@ -32,6 +32,7 @@ export default function MovieStack({
             </div>
           ) : movies.length > 0 ? (
             // Show movies
+
             movies.map((movie, index) => (
               <div
                 key={movie.id}
