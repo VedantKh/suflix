@@ -18,16 +18,16 @@ export async function POST(request: Request) {
           content: `Given this list of movie keywords: ${JSON.stringify(
             availableKeywords.map((k: { name: string }) => k.name)
           )},
-          what would be the most appropriate keyword for this query: "${query}"?
-          Respond with ONLY the exact keyword name from the list, nothing else.`,
+          what would be the most appropriate keywords for this query: "${query}"?
+          Respond with a list of the strings of exact keyword names for as many keywords that fit the query (up to 50), nothing else.`,
         },
       ],
     });
 
-    const matchedKeyword: string = (message.content[0] as { text: string })
-      .text;
+    const matchedKeywords: string = message.content[0].text;
+    console.log(matchedKeywords)
 
-    return NextResponse.json({ matchedKeyword });
+    return NextResponse.json({ matchedKeywords });
   } catch (error) {
     console.error("Error in convert-to-keyword:", error);
     return NextResponse.json(

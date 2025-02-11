@@ -7,20 +7,18 @@ import { MovieObject } from "@/types/movie";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const keyword = searchParams.get("keyword")?.toLowerCase();
-
-    if (!keyword) {
+    const keywordsParam = searchParams.get("keywords");
+    
+    if (!keywordsParam) {
       return NextResponse.json({ moviesByRating: [], moviesByPopularity: [] });
     }
 
+    const keywords = keywordsParam.split(',').map(k => k.toLowerCase().trim());
+    console.log('Searching for keywords:', keywords);
+
     const [moviesContent, keywordsContent] = await Promise.all([
-      fs.readFile(
-        path.join(process.cwd(), "src/data/raw_data/movies_metadata.csv"),
-        { encoding: "utf-8" }
-      ),
-      fs.readFile(path.join(process.cwd(), "src/data/raw_data/keywords.csv"), {
-        encoding: "utf-8",
-      }),
+      fs.readFile(path.join(process.cwd(), "src/data/raw_data/movies_metadata.csv"), { encoding: "utf-8" }),
+      fs.readFile(path.join(process.cwd(), "src/data/raw_data/keywords.csv"), { encoding: "utf-8" }),
     ]);
 
     // Parse keywords data first
@@ -31,26 +29,29 @@ export async function GET(request: Request) {
       skip_records_with_error: true,
     });
 
-    // Create a set of movie IDs that have the matching keyword
-    const movieIdsWithKeyword = new Set();
+    // Create a map of movie IDs to their keyword match counts
+    const movieKeywordMatches = new Map<number, Set<string>>();
+    
     keywordsRecords.forEach((record: any) => {
       try {
-        const keywords = JSON.parse(record.keywords.replace(/'/g, '"'));
-        if (
-          keywords.some(
-            (k: { name: string }) => k.name.toLowerCase() === keyword
+        const movieId = parseInt(record.id);
+        const movieKeywords = JSON.parse(record.keywords.replace(/'/g, '"'));
+        
+        const matchedKeywords = keywords.filter(searchKeyword =>
+          movieKeywords.some((k: { name: string }) => 
+            k.name.toLowerCase() === searchKeyword
           )
-        ) {
-          movieIdsWithKeyword.add(parseInt(record.id));
-          console.log(`Found movie ID ${record.id} with keyword "${keyword}"`);
+        );
+
+        if (matchedKeywords.length > 0) {
+          movieKeywordMatches.set(movieId, new Set(matchedKeywords));
         }
       } catch (e) {
         // Skip malformed records
       }
     });
-    console.log(
-      `Found ${movieIdsWithKeyword.size} movies with keyword: ${keyword}`
-    );
+
+    console.log(`Found ${movieKeywordMatches.size} movies with at least one keyword match`);
 
     // Parse movies data
     const moviesRecords = parse(moviesContent, {
@@ -62,18 +63,22 @@ export async function GET(request: Request) {
     });
 
     // Transform and filter movies
-    const allMovies: MovieObject[] = moviesRecords
+    const allMovies: (MovieObject & { keywordMatches: string[] })[] = moviesRecords
       .map((record: any) => {
         try {
-          const genres = JSON.parse(
-            record.genres.replace(/'/g, '"') || "[]"
-          ).map((g: { id: number; name: string }) => ({
-            id: g.id,
-            name: g.name,
-          }));
+          const movieId = parseInt(record.id);
+          const matchedKeywords = movieKeywordMatches.get(movieId);
+          
+          if (!matchedKeywords) return null;
+
+          const genres = JSON.parse(record.genres.replace(/'/g, '"') || "[]")
+            .map((g: { id: number; name: string }) => ({
+              id: g.id,
+              name: g.name,
+            }));
 
           return {
-            id: parseInt(record.id),
+            id: movieId,
             title: record.title,
             tagline: record.tagline || null,
             overview: record.overview,
@@ -87,23 +92,29 @@ export async function GET(request: Request) {
             vote_count: parseInt(record.vote_count),
             video: record.video === "True",
             original_title: record.original_title,
+            keywordMatches: Array.from(matchedKeywords),
           };
         } catch (e) {
           return null;
         }
       })
-      .filter(
-        (movie): movie is MovieObject =>
-          movie !== null &&
-          movieIdsWithKeyword.has(movie.id) &&
-          movie.vote_count > 100
+      .filter((movie): movie is MovieObject & { keywordMatches: string[] } => 
+        movie !== null && 
+        movie.vote_count > 0
       );
 
-    console.log(
-      `Matched movies with keyword "${keyword}":`,
-      allMovies.map((m) => m.title)
-    );
+    // Sort by number of keyword matches (descending)
+    const moviesByKeywordMatches = allMovies
+      .sort((a, b) => b.keywordMatches.length - a.keywordMatches.length)
+      .slice(0, 10);
 
+    console.log('\nTop 10 movies by keyword matches:');
+    moviesByKeywordMatches.forEach(movie => {
+      console.log(`\n"${movie.title}" matches ${movie.keywordMatches.length} keywords:`);
+      console.log('Matched keywords:', movie.keywordMatches.join(', '));
+    });
+
+    // Regular sorting for rating and popularity
     const moviesByRating = allMovies
       .sort((a, b) => b.vote_average - a.vote_average)
       .slice(0, 10);
@@ -115,6 +126,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       moviesByRating,
       moviesByPopularity,
+      moviesByKeywordMatches, // Added this to the response
     });
   } catch (error) {
     console.error("Error processing CSV:", error);

@@ -53,16 +53,18 @@ export default function Search({ onSearchResults }: SearchProps) {
       ]);
 
       const { matchedGenre } = JSON.parse(genreResponseText);
-      const { matchedKeyword } = JSON.parse(keywordResponseText);
+      const { matchedKeywords } = JSON.parse(keywordResponseText);
       console.log("Matched Genre:", matchedGenre);
-      console.log("Matched Keyword:", matchedKeyword);
+      console.log("Matched Keywords:", matchedKeywords, typeof matchedKeywords);
 
-      // Then fetch movies by both genre and keyword in parallel
+      // Convert single keyword to array and add any additional keywords you want to match
+      const actualArray: string[] = JSON.parse(matchedKeywords);
+
+
+      // Then fetch movies by both genre and keywords in parallel
       const [genreMovies, keywordMovies] = await Promise.all([
         fetch(`/api/movies?genre=${encodeURIComponent(matchedGenre)}`),
-        fetch(
-          `/api/movies-by-keyword?keyword=${encodeURIComponent(matchedKeyword)}`
-        ),
+        fetch(`/api/movies-by-keyword?keywords=${encodeURIComponent(actualArray.join(','))}`),
       ]);
 
       const [genreData, keywordData] = await Promise.all([
