@@ -106,9 +106,9 @@ export async function GET(request: Request) {
       };
 
       // Log titles of movies that match the keyword
-      if (keyword && movieIdsWithKeyword.has(movieObj.id)) {
-        console.log(`Movie with keyword "${keyword}":`, movieObj.title);
-      }
+    //   if (keyword && movieIdsWithKeyword.has(movieObj.id)) {
+    //     // console.log(`Movie with keyword "${keyword}":`, movieObj.title);
+    //   }
 
       return movieObj;
     });

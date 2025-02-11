@@ -57,16 +57,42 @@ export default function Search({ onSearchResults }: SearchProps) {
       console.log("Matched Genre:", matchedGenre);
       console.log("Matched Keyword:", matchedKeyword);
 
-      // Then use both matched genre and keyword to search for movies
-      const response = await fetch(
-        `/api/movies?genre=${encodeURIComponent(
-          matchedGenre
-        )}&keyword=${encodeURIComponent(matchedKeyword)}`
-      );
-      const data = await response.json();
+      // Then fetch movies by both genre and keyword in parallel
+      const [genreMovies, keywordMovies] = await Promise.all([
+        fetch(`/api/movies?genre=${encodeURIComponent(matchedGenre)}`),
+        fetch(
+          `/api/movies-by-keyword?keyword=${encodeURIComponent(matchedKeyword)}`
+        ),
+      ]);
+
+      const [genreData, keywordData] = await Promise.all([
+        genreMovies.json(),
+        keywordMovies.json(),
+      ]);
+
+      // Combine and deduplicate results
+      const combinedRatings = [
+        ...genreData.moviesByRating,
+        ...keywordData.moviesByRating,
+      ]
+        .filter(
+          (movie, index, self) =>
+            index === self.findIndex((m) => m.id === movie.id)
+        )
+        .slice(0, 10);
+
+      const combinedPopularity = [
+        ...genreData.moviesByPopularity,
+        ...keywordData.moviesByPopularity,
+      ]
+        .filter(
+          (movie, index, self) =>
+            index === self.findIndex((m) => m.id === movie.id)
+        )
+        .slice(0, 10);
 
       if (onSearchResults) {
-        onSearchResults(data.moviesByRating, data.moviesByPopularity);
+        onSearchResults(combinedRatings, combinedPopularity);
       }
     } catch (error) {
       console.error("Failed to search movies:", error);
