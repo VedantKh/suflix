@@ -14,30 +14,35 @@ export default function MovieStack({
 }: MovieStackProps) {
   return (
     <div className="w-full">
-      {title && <h2 className="text-2xl font-bold mb-4 px-4">{title}</h2>}
+      {title && <h2 className="text-2xl font-bold mb-4">{title}</h2>}
 
       <div className="relative">
         {/* Gradient masks for scroll indication */}
         <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-10" />
         <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10" />
 
-        {/* Scrollable container */}
-        <div className="overflow-x-auto flex gap-4 px-4 pb-4 snap-x snap-mandatory">
+        {/* Scrollable container - removed left padding */}
+        <div className="overflow-x-auto flex gap-4 pr-4 pb-4 snap-x snap-mandatory scrollbar-hide">
           {isLoading ? (
             // Show loading
-            <div> 
-                <h3>Loading...</h3>
+            <div className="pl-4">
+              {" "}
+              {/* Add padding to loading state */}
+              <h3>Loading...</h3>
             </div>
           ) : movies.length > 0 ? (
             // Show movies
-            movies.map((movie) => (
-              <div key={movie.id} className="snap-start shrink-0">
+            movies.map((movie, index) => (
+              <div
+                key={movie.id}
+                className={`snap-start shrink-0 ${index === 0 ? "pl-2" : ""}`}
+              >
                 <MoviePreview movie={movie} />
               </div>
             ))
           ) : (
             // Show message if no movies
-            <div className="flex items-center justify-center w-full min-h-[400px] text-foreground/70">
+            <div className="flex items-center justify-center w-full min-h-[400px] text-foreground/70 pl-4">
               No movies found
             </div>
           )}

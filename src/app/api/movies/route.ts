@@ -31,7 +31,7 @@ export async function GET() {
     console.log(records.length);
 
     // Transform and take records 35-40 instead (since we see good data there)
-    const movies: MovieObject[] = records.slice(35, 40).map((record: any) => {
+    const movies: MovieObject[] = records.slice(70, 80).map((record: any) => {
       const genres = (() => {
         try {
           // Clean up the string before parsing
