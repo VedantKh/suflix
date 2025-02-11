@@ -10,23 +10,31 @@ export default function MoviePreview({ movie }: MoviePreviewProps) {
       {/* Glass background */}
       <div className="absolute inset-0 bg-white/15 dark:bg-black/30 backdrop-blur-xl border border-white/30 dark:border-white/10 rounded-xl shadow-lg" />
 
-      <div className="relative p-6 flex flex-col gap-4">
-        {/* Rating badge */}
-        <div className="inline-flex self-end bg-black/70 backdrop-blur-md px-2.5 py-1.5 rounded-md border border-white/10">
-          <span className="text-yellow-400 font-semibold">
-            ★ {movie.vote_average.toFixed(1)}
+      {/* Hover overlay mask */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 flex items-center justify-center gap-8">
+        {/* Rating */}
+        <div className="flex flex-col items-center">
+          <span className="text-yellow-400 text-3xl">★</span>
+          <span className="text-white font-bold text-xl">
+            {movie.vote_average.toFixed(1)}
           </span>
+          <span className="text-white/70 text-sm">Rating</span>
         </div>
 
+        {/* Vote Count */}
+        <div className="flex flex-col items-center">
+          <span className="text-blue-400 text-3xl">👥</span>
+          <span className="text-white font-bold text-xl">
+            {movie.vote_count.toLocaleString()}
+          </span>
+          <span className="text-white/70 text-sm">Votes</span>
+        </div>
+      </div>
+
+      <div className="relative p-6 flex flex-col gap-4">
         {/* Movie info */}
         <div className="space-y-3">
           <h2 className="text-xl font-bold line-clamp-1">{movie.title}</h2>
-
-          {movie.tagline && (
-            <p className="text-sm italic text-foreground/80 line-clamp-1">
-              {movie.tagline}
-            </p>
-          )}
 
           {/* <p className="text-sm text-foreground/90 line-clamp-3">
             {movie.overview}

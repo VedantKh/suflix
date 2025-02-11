@@ -24,7 +24,7 @@ export default function MovieStack({
         {/* Scrollable container */}
         <div className="overflow-x-auto flex gap-4 px-4 pb-4 snap-x snap-mandatory">
           {isLoading ? (
-            // Show skeletons while loading
+            // Show loading
             <div> 
                 <h3>Loading...</h3>
             </div>
