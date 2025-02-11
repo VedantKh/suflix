@@ -8,7 +8,10 @@ const anthropic = new Anthropic({
 
 export async function POST(request: Request) {
   try {
-    const { query, availableGenres } = await request.json();
+    const {
+      query,
+      availableGenres,
+    }: { query: string; availableGenres: GenreObject[] } = await request.json();
 
     const message = await anthropic.messages.create({
       model: "claude-3-haiku-20240307",
@@ -25,10 +28,7 @@ export async function POST(request: Request) {
       ],
     });
 
-    console.log('Full message response:', message);
-    console.log('Content:', message.content);
-    const matchedGenre = message.content[0].text;
-    console.log('Matched genre:', matchedGenre);
+    const matchedGenre: string = (message.content[0] as { text: string }).text;
 
     return NextResponse.json({ matchedGenre });
   } catch (error) {

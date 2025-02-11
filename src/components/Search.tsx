@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { MovieObject } from "@/types/movie";
+import KeywordObject from "@/types/keyword";
+import GenreObject from "@/types/genre";
 
 interface SearchProps {
   onSearchResults: (
@@ -9,15 +11,11 @@ interface SearchProps {
   ) => void;
 }
 
-interface Genre {
-  id: number;
-  name: string;
-}
-
 export default function Search({ onSearchResults }: SearchProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [genres, setGenres] = useState<Genre[]>([]);
+  const [genres, setGenres] = useState<GenreObject[]>([]);
+  const [keywords, setKeywords] = useState<KeywordObject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const handleSearch = async () => {
@@ -25,32 +23,45 @@ export default function Search({ onSearchResults }: SearchProps) {
 
     setIsSearching(true);
     try {
-      console.log('Sending search request with term:', searchTerm);
-      console.log('Available genres:', genres);
-      
-      // First, convert natural language to genre using Claude
-      const genreResponse = await fetch("/api/convert-to-genre", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: searchTerm,
-          availableGenres: genres,
+      // First, convert natural language to genre and keyword using Claude
+      const [genreResponse, keywordResponse] = await Promise.all([
+        fetch("/api/convert-to-genre", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: searchTerm,
+            availableGenres: genres,
+          }),
         }),
-      });
+        fetch("/api/convert-to-keyword", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: searchTerm,
+            availableKeywords: keywords,
+          }),
+        }),
+      ]);
 
-      console.log('Genre response status:', genreResponse.status);
-      console.log('Genre response headers:', genreResponse.headers);
-      const responseText = await genreResponse.text();
-      console.log('Raw response text:', responseText);
-      
-      const { matchedGenre } = JSON.parse(responseText);
-      console.log('Matched genre:', matchedGenre);
+      const [genreResponseText, keywordResponseText] = await Promise.all([
+        genreResponse.text(),
+        keywordResponse.text(),
+      ]);
 
-      // Then use the matched genre to search for movies
+      const { matchedGenre } = JSON.parse(genreResponseText);
+      const { matchedKeyword } = JSON.parse(keywordResponseText);
+      console.log("Matched Genre:", matchedGenre);
+      console.log("Matched Keyword:", matchedKeyword);
+
+      // Then use both matched genre and keyword to search for movies
       const response = await fetch(
-        `/api/movies?genre=${encodeURIComponent(matchedGenre)}`
+        `/api/movies?genre=${encodeURIComponent(
+          matchedGenre
+        )}&keyword=${encodeURIComponent(matchedKeyword)}`
       );
       const data = await response.json();
 
@@ -78,6 +89,20 @@ export default function Search({ onSearchResults }: SearchProps) {
       }
     };
 
+    const fetchKeywords = async () => {
+      try {
+        const response = await fetch("/api/keywords");
+        const data = await response.json();
+        setKeywords(data.keywords);
+        console.log(data.keywords);
+      } catch (error) {
+        console.error("Failed to fetch keywords:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchKeywords();
     fetchGenres();
   }, []);
 
