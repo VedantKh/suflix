@@ -15,6 +15,7 @@ export default function Home() {
         const response = await fetch("/api/movies");
         const data = await response.json();
         setMoviesList(data.movies);
+        console.log(data.movies)
       } catch (error) {
         console.error("Failed to fetch movies:", error);
       } finally {

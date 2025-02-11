@@ -28,9 +28,9 @@ export default function MoviePreview({ movie }: MoviePreviewProps) {
             </p>
           )}
 
-          <p className="text-sm text-foreground/90 line-clamp-3">
+          {/* <p className="text-sm text-foreground/90 line-clamp-3">
             {movie.overview}
-          </p>
+          </p> */}
 
           {/* Genres */}
           <div className="flex flex-wrap gap-2">

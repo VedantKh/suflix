@@ -30,18 +30,18 @@ export async function GET() {
 
     console.log(records.length);
 
-    // Transform and take first 5 records
-    const movies: MovieObject[] = records.slice(30, 35).map((record: any) => ({
-      id: parseInt(record.id),
-      title: record.title,
-      tagline: record.tagline || null,
-      overview: record.overview,
-      poster_path: record.poster_path || null,
-      release_date: record.release_date,
-      vote_average: parseFloat(record.vote_average),
-      genres: (() => {
+    // Transform and take records 35-40 instead (since we see good data there)
+    const movies: MovieObject[] = records.slice(35, 40).map((record: any) => {
+      const genres = (() => {
         try {
-          const genresData = JSON.parse(record.genres || "[]");
+          // Clean up the string before parsing
+          const cleanedGenres = record.genres
+            .replace(/'/g, '"') // Replace single quotes with double quotes
+            .replace(/\s+/g, " ") // Normalize whitespace
+            .trim(); // Remove any leading/trailing whitespace
+
+          const genresData = JSON.parse(cleanedGenres || "[]");
+
           if (!Array.isArray(genresData)) return [];
           return genresData.map((g: { id: number; name: string }) => ({
             id: g.id,
@@ -50,18 +50,30 @@ export async function GET() {
         } catch (e) {
           console.warn(
             `Skipping genres for movie ${record.id} due to invalid data:`,
+            record.genres,
             e
           );
           return []; // Return empty array instead of throwing error
         }
-      })(),
-      adult: record.adult === "True",
-      original_language: record.original_language,
-      popularity: parseFloat(record.popularity),
-      vote_count: parseInt(record.vote_count),
-      video: record.video === "True",
-      original_title: record.original_title,
-    }));
+      })();
+
+      return {
+        id: parseInt(record.id),
+        title: record.title,
+        tagline: record.tagline || null,
+        overview: record.overview,
+        poster_path: record.poster_path || null,
+        release_date: record.release_date,
+        vote_average: parseFloat(record.vote_average),
+        genres,
+        adult: record.adult === "True",
+        original_language: record.original_language,
+        popularity: parseFloat(record.popularity),
+        vote_count: parseInt(record.vote_count),
+        video: record.video === "True",
+        original_title: record.original_title,
+      };
+    });
 
     return NextResponse.json({ movies });
   } catch (error) {
