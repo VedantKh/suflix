@@ -6,7 +6,10 @@ import { useState, useEffect } from "react";
 import { MovieObject } from "@/types/movie";
 
 export default function Home() {
-  const [moviesList, setMoviesList] = useState<MovieObject[]>([]);
+  const [moviesRatingsList, setMoviesRatingsList] = useState<MovieObject[]>([]);
+  const [moviesPopularityList, setMoviesPopularityList] = useState<
+    MovieObject[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -22,7 +25,8 @@ export default function Home() {
         : "/api/by_ratings";
       const response = await fetch(url);
       const data = await response.json();
-      setMoviesList(data.movies);
+      setMoviesRatingsList(data.moviesByRating);
+      setMoviesPopularityList(data.moviesByPopularity);
     } catch (error) {
       console.error("Failed to fetch movies:", error);
     } finally {
@@ -30,8 +34,12 @@ export default function Home() {
     }
   };
 
-  const handleSearchResults = (movies: MovieObject[]) => {
-    setMoviesList(movies);
+  const handleSearchResults = (
+    moviesByRating: MovieObject[],
+    moviesByPopularity: MovieObject[]
+  ) => {
+    setMoviesRatingsList(moviesByRating);
+    setMoviesPopularityList(moviesByPopularity);
   };
 
   return (
@@ -45,7 +53,10 @@ export default function Home() {
           <div className="w-full flex justify-center">
             <Search onSearchResults={handleSearchResults} />
           </div>
-          <MovieStack movies={moviesList} isLoading={isLoading} />
+          <h3>Top rated (quality)</h3>
+          <MovieStack movies={moviesRatingsList} isLoading={isLoading} />
+          <h3>Most popular (everyone's seen it)</h3>
+          <MovieStack movies={moviesPopularityList} isLoading={isLoading} />
         </main>
       </div>
     </div>

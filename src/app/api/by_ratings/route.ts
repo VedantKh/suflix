@@ -76,14 +76,25 @@ export async function GET(request: Request) {
             movie.genres.some((g) => g.name.toLowerCase() === genre) &&
             movie.vote_count > 100 // Only include movies with significant votes
         )
-      : allMovies;
+      : allMovies.filter(
+          (movie) =>
+            movie.vote_count > 100 // Only include movies with significant votes
+        );
 
     // Sort by rating and take top 10
-    const topMovies = filteredMovies
+    const topMoviesByRating = filteredMovies
       .sort((a, b) => b.vote_average - a.vote_average)
       .slice(0, 10);
 
-    return NextResponse.json({ movies: topMovies });
+    // Sort by rating and take top 10
+    const topMoviesByPopularity = filteredMovies
+      .sort((a, b) => b.popularity - a.popularity)
+      .slice(0, 10);
+
+    return NextResponse.json({ 
+      moviesByRating: topMoviesByRating,
+      moviesByPopularity: topMoviesByPopularity 
+    });
   } catch (error) {
     console.error("Error processing CSV:", error);
     return NextResponse.json(

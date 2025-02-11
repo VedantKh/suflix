@@ -1,8 +1,12 @@
 "use client";
 import { useState } from "react";
+import { MovieObject } from "@/types/movie"; 
 
 interface SearchProps {
-  onSearchResults?: (movies: any[]) => void;
+  onSearchResults: (
+    moviesByRating: MovieObject[],
+    moviesByPopularity: MovieObject[]
+  ) => void;
 }
 
 export default function Search({ onSearchResults }: SearchProps) {
@@ -11,14 +15,16 @@ export default function Search({ onSearchResults }: SearchProps) {
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
-    
+
     setIsSearching(true);
     try {
-      const response = await fetch(`/api/by_ratings?genre=${encodeURIComponent(searchTerm)}`);
+      const response = await fetch(
+        `/api/by_ratings?genre=${encodeURIComponent(searchTerm)}`
+      );
       const data = await response.json();
-      
+
       if (onSearchResults) {
-        onSearchResults(data.movies);
+        onSearchResults(data.moviesByRating, data.moviesByPopularity);
       }
     } catch (error) {
       console.error("Failed to search movies:", error);

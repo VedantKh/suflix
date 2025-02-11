@@ -11,23 +11,32 @@ export default function MoviePreview({ movie }: MoviePreviewProps) {
       <div className="absolute inset-0 bg-white/10 dark:bg-white/5 backdrop-blur-xl rounded-3xl shadow-lg" />
 
       {/* Hover overlay mask */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 flex items-center justify-center gap-8">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 flex items-center justify-center gap-4">
         {/* Rating */}
         <div className="flex flex-col items-center">
-          <span className="text-yellow-400 text-3xl">★</span>
-          <span className="text-white font-bold text-xl">
+          <span className="text-yellow-400 text-2xl">★</span>
+          <span className="text-white font-bold text-lg">
             {movie.vote_average.toFixed(1)}
           </span>
-          <span className="text-white/70 text-sm">Rating</span>
+          <span className="text-white/70 text-xs">Rating</span>
         </div>
 
         {/* Vote Count */}
         <div className="flex flex-col items-center">
-          <span className="text-blue-400 text-3xl">👥</span>
-          <span className="text-white font-bold text-xl">
+          <span className="text-blue-400 text-2xl">👥</span>
+          <span className="text-white font-bold text-lg">
             {movie.vote_count.toLocaleString()}
           </span>
-          <span className="text-white/70 text-sm">Votes</span>
+          <span className="text-white/70 text-xs">Votes</span>
+        </div>
+
+        {/* Popularity */}
+        <div className="flex flex-col items-center">
+          <span className="text-green-400 text-2xl">📈</span>
+          <span className="text-white font-bold text-lg">
+            {movie.popularity.toFixed(0)}
+          </span>
+          <span className="text-white/70 text-xs">Popularity</span>
         </div>
       </div>
 
