@@ -28,7 +28,9 @@ export default function MovieStack({
             <div className="pl-4">
               {" "}
               {/* Add padding to loading state */}
-              <h3>Loading...</h3>
+              <div className="w-full min-w-[350px] max-w-lg h-[158px] rounded-[32px] bg-white/[0.06] animate-pulse flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-white/20 border-t-white/80 rounded-full animate-spin" />
+              </div>
             </div>
           ) : movies.length > 0 ? (
             // Show movies

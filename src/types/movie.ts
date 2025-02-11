@@ -16,4 +16,3 @@ export interface MovieObject {
   video: boolean;
   original_title: string;
 }
-

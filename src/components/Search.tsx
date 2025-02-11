@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { MovieObject } from "@/types/movie"; 
+import { useState, useEffect } from "react";
+import { MovieObject } from "@/types/movie";
 
 interface SearchProps {
   onSearchResults: (
@@ -9,17 +9,48 @@ interface SearchProps {
   ) => void;
 }
 
+interface Genre {
+  id: number;
+  name: string;
+}
+
 export default function Search({ onSearchResults }: SearchProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
 
     setIsSearching(true);
     try {
+      console.log('Sending search request with term:', searchTerm);
+      console.log('Available genres:', genres);
+      
+      // First, convert natural language to genre using Claude
+      const genreResponse = await fetch("/api/convert-to-genre", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: searchTerm,
+          availableGenres: genres,
+        }),
+      });
+
+      console.log('Genre response status:', genreResponse.status);
+      console.log('Genre response headers:', genreResponse.headers);
+      const responseText = await genreResponse.text();
+      console.log('Raw response text:', responseText);
+      
+      const { matchedGenre } = JSON.parse(responseText);
+      console.log('Matched genre:', matchedGenre);
+
+      // Then use the matched genre to search for movies
       const response = await fetch(
-        `/api/by_ratings?genre=${encodeURIComponent(searchTerm)}`
+        `/api/movies?genre=${encodeURIComponent(matchedGenre)}`
       );
       const data = await response.json();
 
@@ -32,6 +63,27 @@ export default function Search({ onSearchResults }: SearchProps) {
       setIsSearching(false);
     }
   };
+
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const response = await fetch("/api/genres");
+        const data = await response.json();
+        setGenres(data.genres);
+        console.log(data.genres);
+      } catch (error) {
+        console.error("Failed to fetch genres:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGenres();
+  }, []);
+
+  //   if (isLoading) {
+  //     return <div>Loading genres...</div>;
+  //   }
 
   return (
     <div className="flex gap-2 w-full max-w-md">

@@ -21,8 +21,8 @@ export default function Home() {
     setIsLoading(true);
     try {
       const url = genre
-        ? `/api/by_ratings?genre=${encodeURIComponent(genre)}`
-        : "/api/by_ratings";
+        ? `/api/movies?genre=${encodeURIComponent(genre)}`
+        : "/api/movies";
       const response = await fetch(url);
       const data = await response.json();
       setMoviesRatingsList(data.moviesByRating);
@@ -53,9 +53,9 @@ export default function Home() {
           <div className="w-full flex justify-center">
             <Search onSearchResults={handleSearchResults} />
           </div>
-          <h3>Top rated (quality)</h3>
+          <h3 className="text-2xl font-semibold text-white/90 tracking-tight ml-8">Top rated (quality)</h3>
           <MovieStack movies={moviesRatingsList} isLoading={isLoading} />
-          <h3>Most popular (everyone's seen it)</h3>
+          <h3 className="text-2xl font-semibold text-white/90 tracking-tight ml-8">Most popular (everyone's seen it)</h3>
           <MovieStack movies={moviesPopularityList} isLoading={isLoading} />
         </main>
       </div>
