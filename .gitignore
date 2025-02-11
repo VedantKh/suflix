@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# data directories
+/src/data/raw_data/
+/src/data/json_db/
