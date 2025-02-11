@@ -15,7 +15,7 @@ export default function Home() {
         const response = await fetch("/api/movies");
         const data = await response.json();
         setMoviesList(data.movies);
-        console.log(data.movies)
+        console.log(data.movies);
       } catch (error) {
         console.error("Failed to fetch movies:", error);
       } finally {
@@ -24,18 +24,6 @@ export default function Home() {
     }
 
     fetchMovies();
-  }, []);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth) * 100;
-      const y = (e.clientY / window.innerHeight) * 100;
-      document.body.style.setProperty("--mouse-x", `${x}%`);
-      document.body.style.setProperty("--mouse-y", `${y}%`);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   return (

@@ -5,18 +5,12 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --blob-color-1: rgba(123, 31, 162, 0.1);
-  --blob-color-2: rgba(32, 201, 151, 0.1);
-  --blob-color-3: rgba(47, 112, 193, 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
-    --blob-color-1: rgba(123, 31, 162, 0.07);
-    --blob-color-2: rgba(32, 201, 151, 0.07);
-    --blob-color-3: rgba(47, 112, 193, 0.07);
   }
 }
 
@@ -24,42 +18,6 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
-  position: relative;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-body::before,
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-}
-
-/* Gradient blobs */
-body::before {
-  background: 
-    radial-gradient(circle 600px at 50% 0%, var(--blob-color-1), transparent),
-    radial-gradient(circle 800px at 90% 20%, var(--blob-color-2), transparent),
-    radial-gradient(circle 700px at 10% 60%, var(--blob-color-3), transparent);
-  filter: blur(60px);
-  opacity: 0.8;
-}
-
-body::after {
-  background: radial-gradient(
-    circle 1000px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(255, 255, 255, 0.06),
-    transparent 40%
-  );
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-body:hover::after {
-  opacity: 1;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
